@@ -1212,21 +1212,6 @@ class ChessGame
     }
 
     /**
-     * @return string|false winner of game, or draw (W|B|D), or false if still going
-     */
-    public function gameOver()
-    {
-        if ($this->inCheckmate()) {
-            return ('W' === $this->_move) ? 'B' : 'W';
-        }
-        if ($this->inForcedDraw()) {
-            return 'D';
-        }
-
-        return false;
-    }
-
-    /**
      * Determine whether a side is in checkmate
      *
      * @param string $color           color of side to check, defaults to the current side (W|B)
@@ -3805,5 +3790,95 @@ class ChessGame
         }
 
         return $ret;
+    }
+
+    /**
+     * @param string $pgn
+     */
+    public function setPgn(string $pgn)
+    {
+        $moves = explode(" ", $pgn);
+        foreach ($moves as $move) {
+            $finalMove = preg_replace('/^\d+\./', '', $move);
+            $finalMove = preg_replace('/[#+]/', '', $finalMove);
+            $this->moveSAN($finalMove);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getPgn()
+    {
+        return $this->getMoveListString();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function gameOver()
+    {
+        if ($this->inClaimableDraw()) {
+            return 'D';
+        }
+
+        if ($this->inCheckMate()) {
+            return ('W' === $this->_move) ? 'B' : 'W';
+        }
+        if ($this->inForcedDraw()) {
+            return 'D';
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInsufficientMaterialWhite() : bool
+    {
+        $pieces = $this->toArray();
+
+        $countLightPieces = 0;
+
+        foreach ($pieces as $square => $piece) {
+            switch ($piece) {
+                case 'P':
+                case 'R':
+                case 'Q':
+                    return false;
+                case 'B':
+                case 'N':
+                    $countLightPieces++;
+                    break;
+            }
+        }
+
+        return $countLightPieces < 2;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInsufficientMaterialBlack() : bool
+    {
+        $pieces = $this->toArray();
+
+        $countLightPieces = 0;
+
+        foreach ($pieces as $square => $piece) {
+            switch ($piece) {
+                case 'p':
+                case 'r':
+                case 'q':
+                    return false;
+                case 'b':
+                case 'n':
+                    $countLightPieces++;
+                    break;
+            }
+        }
+
+        return $countLightPieces < 2;
     }
 }
