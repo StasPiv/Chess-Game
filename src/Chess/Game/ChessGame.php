@@ -3806,7 +3806,7 @@ class ChessGame
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getPgn()
     {
@@ -3880,5 +3880,16 @@ class ChessGame
         }
 
         return $countLightPieces < 2;
+    }
+
+    /**
+     * @param array $move
+     * @return bool
+     */
+    public function isPromotionMove(array $move): bool
+    {
+        return $this->_squareToPiece($move['from'])['piece'] == 'P' &&
+        (strpos($move['to'], '8') !== false ||
+            strpos($move['to'], '1') !== false);
     }
 }
